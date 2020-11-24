@@ -14,6 +14,7 @@ library(arules)
 library(glue)  # should eliminate this dependency
 
 RESULTS_PATH = '../../data_scAgeCom/testing/scdiffcom_tms_facs_mixed_Spleen.rds'
+# RESULTS_PATH = '../../data_scAgeCom/analysis/a4_data_results_all_cases.rds'
 results = readRDS(RESULTS_PATH)
 str(results, max.level = 1)
 ```
@@ -73,3 +74,4 @@ results$FPM
 ```
 
 *NOTE*: Heatmaps were done here, but moved to analysis_6b together with bipartite graphs.
+

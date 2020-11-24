@@ -325,7 +325,8 @@ weight_edge <- function(edge,
 
 construct_graph <- function(dt_ora, tissue, dt_filtered=NULL) {
   # Extract celltypes overrepresentation
-  dt_ctypes = get_celltypes_enrichment(dt_ora, cols)
+  # dt_ctypes = get_celltypes_enrichment(dt_ora, cols)
+  dt_ctypes = get_celltypes_enrichment(dt_ora)
   
   # Subset the tissue
   if( tissue == 'All' ) {
