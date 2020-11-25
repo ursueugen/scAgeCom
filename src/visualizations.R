@@ -1,106 +1,3 @@
-# Heatmap plots ------------------------------------------------------------------------
-
-# build_heatmaps <- function(dt, dir_path) {
-#   
-#   # add "/" if not last char of dir_path
-#   if (!substr(dir_path, length(dir_path), length(dir_path)) == "/") {
-#     dir = paste0(dir_path, "/")
-#   } else {
-#     dir = dir_path
-#   }
-#   
-#   dir.create(dir, showWarnings = FALSE) 
-#   
-#   OR_max = 10
-#   OR_min = 0.1
-#   tissues = unique(dt[["Tissue"]])
-#   ncols = dim(dt)[2]
-#   
-#   for (tissue in tissues) {
-#     
-#     dt_edge = dt[Tissue == tissue, 2:ncols]
-#     
-#     print(colnames(dt_edge))
-#     
-#     nrows = dim(dt_edge)[1]
-#     if (nrows == 1) {message(paste0("One edge for: ", tissue))}
-#     
-#     G = graph_from_data_frame(d = dt_edge,
-#                               directed = TRUE,
-#                               vertices = NULL)
-#     
-#     matrix_all = as_adjacency_matrix(G, attr = "OR_DIFF", sparse = FALSE)
-#     matrix_all = clip_matrix(matrix_all, 1, OR_min, OR_max)
-#     
-#     matrix_up = as_adjacency_matrix(G, attr = "OR_UP", sparse = FALSE)
-#     matrix_up = clip_matrix(matrix_up, 1, OR_min, OR_max)
-#     
-#     matrix_down = as_adjacency_matrix(G, attr = "OR_DOWN", sparse = FALSE)
-#     matrix_down = clip_matrix(matrix_down, 1, OR_min, OR_max)
-#     
-#     dir.create(paste0(dir, tissue, '/'), showWarnings = FALSE)
-#     
-#     explanatory_string = paste0("Row-transmitter, col-receiver; ",
-#                                 "Values are clipped log(OR)")
-#     eps = 10**(-5)
-#     generate_heatmap(log(matrix_all + eps),
-#                      #matrix_all,
-#                      title = paste0(tissue, ": ", "ALL ", explanatory_string),
-#                      filename = paste0(dir, tissue, '/', 'ALL.png'))
-#     generate_heatmap(log(matrix_up + eps), 
-#                      #matrix_up,
-#                      title = paste0(tissue, ": ", "UP ", explanatory_string),
-#                      filename = paste0(dir, tissue, '/', 'UP.png'))
-#     generate_heatmap(log(matrix_down + eps),
-#                      #matrix_down,
-#                      title = paste0(tissue, ": ", "DOWN ", explanatory_string),
-#                      filename = paste0(dir, tissue, '/', 'DOWN.png'))
-#   }
-# }
-# 
-# 
-# 
-# clip_matrix <- function(matrix, zero_val, min_val, max_val) {
-#   matrix[matrix == 0] = zero_val
-#   matrix[matrix < min_val] = min_val
-#   matrix[matrix > max_val] = max_val
-#   return(matrix)
-# }
-# 
-# 
-# generate_heatmap <- function(matrix, title, filename) {
-#   
-#   message(paste0("Preparing figure: ", title, " ", filename))
-#   
-#   nrows = dim(matrix)[1]
-#   ncols = dim(matrix)[2]
-#   
-#   if (nrows < 2 | ncols < 2) {
-#     message(paste0("Matrix size is < 2x2: ", title))
-#     return()
-#   }
-#   
-#   breaks = c(seq(-3, -0.5, 0.5), 0, seq(0.5, 3, 0.5))
-#   pheatmap(matrix, #cellwidth=10, cellheight=10,
-#            width=11, height=11,
-#            color = colorRampPalette(brewer.pal(8, "RdYlBu"))(length(breaks)-1),
-#            breaks = breaks,
-#            na_col = "green",
-#            scale = "none",
-#            cluster_rows = nrows >= 2,
-#            cluster_cols = ncols >= 2,
-#            cutree_rows = ifelse(nrows >= 5, min(nrows, 3), 1),
-#            cutree_cols = ifelse(ncols >= 5, min(ncols, 3), 1),
-#            display_numbers=FALSE, 
-#            fontsize=10, 
-#            main = title,
-#            ylab = "Transmitter cell", 
-#            xlab = "Receiver cell",
-#            legend=TRUE,
-#            filename = filename)
-# }
-
-
 get_celltypes_enrichment <- function(dt) {
   
   COL_LIGAND_RECEPTOR_CELLTYPES = "LR_CELLTYPE"
@@ -140,89 +37,6 @@ get_celltypes_enrichment <- function(dt) {
   
   return(dt_ctypes)
 }
-
-# Bipartite graph ----
-# 
-# analyze_Graph <- function(
-#   dt_ora, 
-#   dt_filtered,
-#   tissue, 
-#   config=setup_graph_config(), 
-#   use_adjpval=TRUE,
-#   disperse=TRUE,
-#   dir=NULL,
-#   analysis_name=NULL) {
-#   
-#   ora_has_tissue = 'Tissue' %in% names(dt_ora)
-#   filt_has_tissue = 'Tissue' %in% names(dt_filtered)
-#   
-#   if( !(ora_has_tissue & filt_has_tissue) ) {
-#     stop(paste0('analyze_Graph: Filtered and ORA must have a tissue specified.',
-#                 ' Insert a dummy tissue for compatibility with current code.'))
-#   }
-#   
-#   message('Solve the low statistical power issue by controlling num interactions
-#           in the BH adjustment.')
-#   
-#   if( is.null(dt_filtered) ) {stop('analyze_Graph: dt_filtered is NULL.')}
-#   
-#   # Process ORA results and construct graph
-#   G = construct_graph(dt_ora, tissue, dt_filtered=dt_filtered)
-#   
-#   # Setup
-#   G = setup_graph(G, use_adjpval=use_adjpval, disperse=disperse)
-#   
-#   # Save as edge table and plot
-#   if ( !is.null(dir) ) {
-#     
-#     if ( is.null(analysis_name) ) {
-#       stop('analyze_Graph: Analysis name not provided.')
-#     }
-#     
-#     # save_run_metadata()
-#     
-#     subdirs = c('edge_tables', 'plots')
-#     create_analysis_dirs(dir, analysis_name, subdirs)
-#     
-#     write_as_edge_table(
-#       G, 
-#       path = file.path(dir, analysis_name, 'edge_tables', paste0(tissue, '.tsv'))
-#     )
-#     
-#     plot_graph(
-#       G,
-#       config, 
-#       path = file.path(dir, analysis_name, 'plots', paste0(tissue, '.pdf'))
-#     )
-#   } else {
-#     
-#     if ( !is.null(analysis_name) ) {
-#       stop('analyze_Graph: Analysis name not null.')
-#     }
-#     
-#     plot_graph(
-#       G, 
-#       config, 
-#       path=NULL)
-#   }
-#   
-# }
-
-# create_analysis_dirs <- function(dir,
-#                                  analysis_name,
-#                                  subdirs) {
-#   
-#   analysis_dir = file.path(dir, analysis_name)
-#   dir.create(analysis_dir)
-#   
-#   map(
-#     subdirs,
-#     ~ dir.create( file.path(analysis_dir, .x) )
-#   )
-#   
-# }
-
-
 classify_edges <- function(dt_edge,
                        config=setup_graph_config(),
                        use_adjpval=TRUE) {
@@ -272,54 +86,6 @@ classify_edges <- function(dt_edge,
     }
   )
 }
-
-# color_edge <- function(edge, 
-#                        config=setup_graph_config(),
-#                        use_adjpval=TRUE) {
-#   
-#   COLOR_UP_AND_DOWN = config$EDGE_COLORING$COLOR_BOTH
-#   COLOR_UP = config$EDGE_COLORING$COLOR_UP
-#   COLOR_DOWN = config$EDGE_COLORING$COLOR_DOWN
-#   COLOR_ROBUST = config$EDGE_COLORING$COLOR_ROBUST
-#   COLOR_NONE = config$EDGE_COLORING$COLOR_NONE
-#   
-#   CUTOFF_CHANGE_UP = config$EDGE_COLORING$CUTOFF_UP
-#   CUTOFF_CHANGE_DOWN = config$EDGE_COLORING$CUTOFF_DOWN
-#   CUTOFF_ROBUST_UP = 0.99
-#   CUTOFF_ROBUST_DOWN = 0.99
-#   message('color_edge: some hard-coded cutoff.')
-#   
-#   message(paste0(
-#     'color_edge: refactor to set edge state in the ',
-#     'edge data table to be reused within further analysis.')
-#   )
-#   
-#   if (use_adjpval) {
-#     is_pval_UP = edge$pval_adj_UP < 0.05
-#     is_pval_DOWN = edge$pval_adj_DOWN < 0.05
-#   } else {
-#     is_pval_UP = edge$pval_UP < 0.05
-#     is_pval_DOWN = edge$pval_DOWN < 0.05
-#   }
-#   is_OR_UP_CHANGE = edge$OR_UP >= CUTOFF_CHANGE_UP
-#   is_OR_DOWN_CHANGE = edge$OR_DOWN >= CUTOFF_CHANGE_DOWN
-#   
-#   is_OR_UP_ROBUST = edge$OR_UP <= CUTOFF_ROBUST_UP
-#   is_OR_DOWN_ROBUST = edge$OR_DOWN <= CUTOFF_ROBUST_DOWN
-#   
-#   if (is_OR_UP_CHANGE & is_OR_DOWN_CHANGE & is_pval_UP & is_pval_DOWN) {
-#     return(COLOR_UP_AND_DOWN)
-#   } else if (is_OR_UP_CHANGE & is_pval_UP) {
-#     return(COLOR_UP)
-#   } else if (is_OR_DOWN_CHANGE & is_pval_DOWN) {
-#     return(COLOR_DOWN)
-#   } else if (is_OR_UP_ROBUST & is_OR_DOWN_ROBUST & is_pval_UP & is_pval_DOWN) {
-#     return(COLOR_ROBUST)
-#   } else {
-#     return(COLOR_NONE)
-#   }
-# }
-
 map_edgetype_to_color = function(edge_label, config=setup_graph_config()) {
   COLOR_DIFF = config$EDGE_COLORING$COLOR_BOTH
   COLOR_UP = config$EDGE_COLORING$COLOR_UP
@@ -336,28 +102,6 @@ map_edgetype_to_color = function(edge_label, config=setup_graph_config()) {
   )
   return(label_to_color_map[[edge_label]])
 }
-
-# weight_edge <- function(edge, 
-#                         min_width, 
-#                         max_width, 
-#                         min_value,
-#                         max_value, 
-#                         config=setup_graph_config()) {
-#   
-#   CUTOFF_UP = config$EDGE_COLORING$CUTOFF_UP
-#   CUTOFF_DOWN = config$EDGE_COLORING$CUTOFF_DOWN
-#   
-#   if ((edge$OR_UP >= CUTOFF_UP) & (edge$OR_DOWN >= CUTOFF_DOWN)) {
-#     return(edge$OR)
-#   } else if (edge$OR_UP >= CUTOFF_UP) {
-#     return(edge$OR_UP)
-#   } else if (edge$OR_DOWN >= CUTOFF_DOWN) {
-#     return(edge$OR_DOWN)
-#   } else {
-#     return(1)
-#   }
-# }
-
 construct_graph <- function(dt_ora, tissue, dt_filtered=NULL) {
 
   dt_ctypes = get_celltypes_enrichment(dt_ora)
@@ -407,7 +151,6 @@ construct_graph <- function(dt_ora, tissue, dt_filtered=NULL) {
   message('construct_graph: igraph G holds as graph attributes dt_ora and dt_filtered.')
   return(G)
 }
-
 infer_vertex_types <- function(vertex_names) {
   vertex_types = purrr::map_lgl(
     strsplit(vertex_names, '[()]'),
@@ -415,15 +158,12 @@ infer_vertex_types <- function(vertex_names) {
   )
   return(vertex_types)
 }
-
 setup_graph <- function(G, config=setup_graph_config(), use_adjpval, disperse) {
   G = setup_vertices(G, config)
   G = setup_edges(G, config, use_adjpval)
   G = setup_layout(G, config, disperse)
   return(G)
 }
-
-# To be moved
 count_celltypes_tissue <- function(dt, tissue) {
   # @dt - dt_filtered
   
@@ -443,7 +183,6 @@ count_celltypes_tissue <- function(dt, tissue) {
   counts_dt = counts_dt[order(counts_dt$name)]
   return(counts_dt)
 }
-
 add_vertex_size <- function(G) {
   
   V(G)$vertex.size = 30
@@ -476,22 +215,12 @@ add_vertex_size <- function(G) {
   vertex_counts = vertex_counts_dt[ord, counts]
   
   V(G)$vertex.counts = vertex_counts
-
-  # Get rid of dependency
-  # library('scales')
-  # vertex_sizes = rescale(
-  #   V(G)$vertex.counts, 
-  #   to = c(MINSIZE, MAXSIZE)
-  # )
-  
   vertex_sizes = rescale(vertex_counts, MINSIZE, MAXSIZE)
   
   V(G)$vertex.size = vertex_sizes
   
   return(G)
 }
-
-
 count_interactions_cellpairs_tissue <- function(dt_filtered, tissue) {
   return(
     dt_filtered[,
@@ -504,15 +233,11 @@ count_interactions_cellpairs_tissue <- function(dt_filtered, tissue) {
       )]
   )
 }
-
-
 add_edge_width <- function(G) {
   
   WIDTH_MIN = 0
   WIDTH_MAX = 10
-  
-  # or_max = mapply(max, E(G)$OR_UP, E(G)$OR_DOWN)
-  
+
   edge_dt = data.table::data.table(
     igraph::as_data_frame(G)[, c('from', 'to')]
   )
@@ -536,30 +261,21 @@ add_edge_width <- function(G) {
   
   # Correct order is accomplished by the merge.
   num_interacts = edge_dt[, num_interacts]
-  
-  # E(G)$width = rescale(
-  #   sqrt(num_interacts),
-  #   to = c(WIDTH_MIN, WIDTH_MAX)
-  # )
-
   E(G)$width = rescale(sqrt(num_interacts), WIDTH_MIN, WIDTH_MAX)
   
   return(G)
 }
-
 setup_vertices <- function(G, config) {
   V(G)$vertex_types = infer_vertex_types(V(G)$name)
   G = add_vertex_size(G)
   return(G)
 }
-
 setup_edges <- function(G, config, use_adjpval) {
   E(G)$arrow.size = config$EDGE_STYLE$ARROW_SIZE
   E(G)$edge.color = purrr::map_chr(E(G)$edge_type, map_edgetype_to_color)
   G = add_edge_width(G)
   return(G)
 }
-
 setup_layout <- function(G, config, disperse) {
   layout = igraph::layout_as_bipartite(
     G, 
@@ -571,6 +287,9 @@ setup_layout <- function(G, config, disperse) {
   layout = sort_layout_vertices(layout, G, config, disperse)
   G$layout = layout
   return(G)
+}
+rescale = function(v, min_, max_) {
+  ( v - min(v)) / ( max(v) - min(v) ) * (max_ - min_) + min_
 }
 
 #### Functions for layout ####
@@ -616,9 +335,6 @@ vertex_sort_keys = function(v_names, from, G, config) {
   )
   return(sort_keys)
 }
-
-
-# layout modifiers
 sort_layout_vertices = function(layout, G, config, disperse) {
   
   vertex_names = V(G)$name
@@ -660,82 +376,6 @@ sort_layout_vertices = function(layout, G, config, disperse) {
     )
   }
   return(new_layout)
-}
-
-# #### Write and plot functions ####
-# write_as_edge_table <- function(G, path) {
-#   
-#   if (!is.null(path)) {
-#     df_edge = as_data_frame(G, what='edges')
-#     write.table(
-#       df_edge, 
-#       file = path,
-#       sep='\t',
-#       quote = FALSE,
-#       row.names = FALSE
-#     )
-#   } else {
-#     stop("write_as_edge_table: path argument not provided.")
-#   }
-#   
-# }
-# 
-# plot_graph <- function(G,
-#                        config=setup_graph_config(),
-#                        path=NULL,
-#                        show_legend=FALSE) {
-#   
-#   # Plot
-#   MAIN = paste0('Communication profile with age: ', G$tissue)
-#   MARGIN = 0.5
-#   SUBTITLE = ''
-#   # SUBTITLE = paste0('Difference graph of overrepresented celltype ',
-#   #                   'communication that get\n altered with ageing')
-# 
-#   if( !is.null(path) ) {pdf(path)}
-#   
-#   plot.igraph(
-#     G, 
-#     layout = G$layout,
-#     vertex.color = config$VERTEX_STYLE$COLOR,
-#     vertex.size = V(G)$vertex.size,
-#     vertex.label.dist = config$VERTEX_STYLE$LABEL_DIST,
-#     vertex.label.cex = config$VERTEX_STYLE$LABEL_CEX,
-#     edge.color = E(G)$edge.color,
-#     edge.width = E(G)$edge.width,
-#     main = MAIN,
-#     margin = MARGIN,
-#     sub = SUBTITLE
-#   )
-#   
-#   if (show_legend) {
-#     LEGEND_TITLE = 'Edge color legend'
-#     LEGEND_COLORS = c(
-#       config$EDGE_COLORING$COLOR_NONE, 
-#       config$EDGE_COLORING$COLOR_UP,
-#       config$EDGE_COLORING$COLOR_DOWN,
-#       config$EDGE_COLORING$COLOR_BOTH
-#     )
-#     
-#     legend(x=-1.5, y=-1.1, 
-#            
-#            legend = config$LEGEND$LEGEND_LABELS,
-#            col = LEGEND_COLORS,
-#            title = LEGEND_TITLE,
-#            
-#            bty = 'o',
-#            pch = config$LEGEND$PCH,
-#            cex = config$LEGEND$CEX,
-#            pt.cex = config$LEGEND$PT.CEX,
-#            bg = config$LEGEND$BG,
-#            ncol = config$LEGEND$NCOL
-#     )
-#   }
-#   if( !is.null(path) ) {dev.off()}
-# }
-
-rescale = function(v, min_, max_) {
-  ( v - min(v)) / ( max(v) - min(v) ) * (max_ - min_) + min_
 }
 
 #### Interactive networks ####
