@@ -80,52 +80,6 @@ fetch_results = function(filtered_path, ora_path) {
   ))
 }
 
-
-GRAPH_CONFIG = list(
-  
-  EDGE_COLORING = list(
-    COLOR_UP = "#4285F4",  # blue
-    CUTOFF_UP = 1.1,
-    COLOR_DOWN = "#DB4437", # red
-    CUTOFF_DOWN = 1.1,
-    COLOR_BOTH = "#F4B400",
-    COLOR_ROBUST = "#0F9D58",
-    # COLOR_NONE = "#dde2e4"
-    COLOR_NONE = rgb(0.2, 0.2, 0.2, alpha=0.1)
-  ),
-  
-  EDGE_STYLE = list(
-    ARROW_SIZE = 0.5,
-    WIDTH = 2.5  # will be adjusted by |OR|
-  ),
-  
-  LAYOUT = list(
-    HGAP = 20,
-    VGAP = 20
-  ),
-  
-  VERTEX_STYLE = list(
-    SIZE = 10,
-    LABEL_DIST = 1.5,
-    LABEL_CEX = 1.2,
-    COLOR = '#33FF66'
-  ),
-  
-  LEGEND = list(
-    LEGEND_LABELS = c(
-      'Significant, but small effect',
-      'Upregulated', 
-      'Downregulated', 
-      'Altered'),
-    PCH = c(15),
-    CEX = 0.7,
-    PT.CEX = 1,
-    BG = '#CCCCCC',
-    NCOL = 2
-  )
-  
-)
-
 add_dummy_tissue = function(results) {
   message(paste0('utils.R add_dummy_tissue: upgrade warning:',
                  'A constant tissue column `Tissue` with `DummyTissue` value is inserted',

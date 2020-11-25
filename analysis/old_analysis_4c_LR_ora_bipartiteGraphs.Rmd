@@ -7,9 +7,9 @@ This notebook presents the heatmaps and bipartite graphs.
 ```{r}
 library(data.table)
 library(purrr)
-library(pheatmap)
-library(RColorBrewer)
-library(scales)
+# library(pheatmap)
+# library(RColorBrewer)
+# library(scales)
 library(igraph)
 library(visNetwork)
 
@@ -153,101 +153,18 @@ analyze_Graph(
 # Interactive cell-cell communication graphs
 
 ```{r}
-source('../src/visualizations.R')
-
 RESULTS_PATH = '../../data_scAgeCom/analysis/a4_data_results_all_cases.rds'
 results = readRDS(RESULTS_PATH)
 facs = results$facs_mixed
 
-ora = facs$Liver@ORA
-ora_ct = ora$LR_CELLTYPE
-ora_ct[, Tissue := 'Dummy']
+```
 
 
-# ct = get_celltypes_enrichment(ora_ct)
-# getClass(facs$Liver)
-G = construct_graph(ora_ct, 'Dummy', dt_filtered=facs$Liver@cci_table_filtered)
-G = setup_graph(G, use_adjpval=TRUE, disperse=FALSE)
+```{r}
+source('../src/visualizations.R')
 
-nodes = data.table(as_data_frame(G, what='vertices'))
-edges = data.table(as_data_frame(G, what='edges'))
-igraph_layout = G$layout
-
-# Global node config
-NODES_SHAPE = 'square'
-NODES_COLOR_CONFIG = list(
-  background='gray',
-  border='darkblue', 
-  highlight=list(background='lightblue', border='yellow'), 
-  hover=list(background='lightred', border='green')
-)
-
-# Global edges config
-
-
-# Individual nodes config
-nodes[,
-      'id' := name][,
-      'label' := name][,
-      'group' := vertex_types][,
-      'value' := vertex.size][,
-      'color' := 'green'][,
-      'shadow' := TRUE][,
-      'shapeProperties' := NULL][,
-      'level' := ifelse(vertex_types == TRUE, 1, 2)
-]
-# nodes
-
-# Individual edges config
-edges[,
-      color.color := edge.color][,
-      color.highlight := edge.color][,
-      color.hover := edge.color
-      #]
-]
-edges
-
-# Network components
-network_global = visNetwork(
-    nodes, edges,
-    width='100%',# height='100%',
-    main='Tissue cell:cell communication', 
-    submain='...',
-    footer='Graph',
-    background='white')
-nodes_global = . %>% visNodes(shape=NODES_SHAPE, physics=FALSE)
-edges_global = . %>% visEdges(shadow=TRUE, arrows='middle')
-# layout_hierarchical = . %>% visHierarchicalLayout(
-#   direction = 'LR', levelSeparation = 500) # direction = 'LR'
-layout = . %>% visIgraphLayout(layout='layout.norm', layoutMatrix=igraph_layout)
-options = . %>% visOptions(
-  highlightNearest=list(enabled=TRUE, degree=1, hover=TRUE), 
-  selectedBy=list(variable="id", multiple=TRUE),
-  manipulation=TRUE)
-interactive = . %>% visInteraction(
-  keyboard=list(enabled=TRUE),
-  multiselect=TRUE,
-  navigationButtons=TRUE
-)
-configure = . %>% visConfigure(enabled=TRUE, showButton=TRUE)
-legend = . %>% visLegend(
-  enabled=TRUE,
-  useGroups=FALSE
-)
-
-# visSave
-
-# Build network
-network_global %>%
-  nodes_global %>%
-  edges_global %>%
-  layout %>%
-  legend %>%
-  options %>%
-  interactive
-  # configure
-
-  # visGroups() %>%
+interactive_net = build_interactive_network(facs[['Liver']], 'bipartite')
+interactive_net
 ```
 
 

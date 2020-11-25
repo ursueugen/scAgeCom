@@ -64,8 +64,17 @@ tab_tissue_specific <- tabPanel(
           value = "TSA_ORA_PLOT"
         ),
         tabPanel(
-          title = "Network"
+          title = "Network",
+          analyze_Graph()
         ),
+        # tabPanel(
+        #   title = 'Bipartite interactive network',
+        #   ??plotOutput('')
+        # ),
+        # tabPanel(
+        #   title = 'Cell community interactive network',
+        #   ??plotOutput('')
+        # ),
         id = "active_TSA_panel"
       )
     )

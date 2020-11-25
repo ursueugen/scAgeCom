@@ -130,7 +130,7 @@ get_TSA_interaction_table <- function(
         `Receiver Cell Type` %in% input$TSA_RECEIVER_CHOICE &
         `Adj. P-Value` <= input$TSA_SLIDER_PVALUE &
         abs(LOG2FC) >= input$TSA_SLIDER_LOG2FC
-        ]
+      ]
     setorder(
       dt,
       -LOG2FC,
@@ -140,7 +140,7 @@ get_TSA_interaction_table <- function(
       dt,
       cols_to_show_DATA,
       cols_numeric_DATA
-      )
+    )
   })
 }
 
@@ -233,4 +233,30 @@ plot_TSA_ORA <- function(
   })
 }
 
+# No call to analyzeGraph, called directly from tab_tissue_specific.R
 
+# build_TSA_INTERACTIVE_BIPARTITE_NET <- function(
+#   input
+# ) {
+#   renderPlot({
+#     stop('Not implemented')
+#     req(input$TSA_DATASET_CHOICE, input$TSA_TISSUE_CHOICE, input$TSA_ORA_CATEGORY_CHOICE, input$TSA_ORA_TYPE_CHOICE)
+#     obj <- DATASETS_light[[input$TSA_DATASET_CHOICE]][[input$TSA_TISSUE_CHOICE]]
+#     req(obj)
+#     # TO ADD
+#     # scDiffCom::build_interactive_network
+#   })
+# }
+# 
+# build_TSA_INTERACTIVE_CELLCOMMUNITY_NET <- function(
+#   input
+# ) {
+#   renderPlot({
+#     stop('Not implemented')
+#     req(input$TSA_DATASET_CHOICE, input$TSA_TISSUE_CHOICE, input$TSA_ORA_CATEGORY_CHOICE, input$TSA_ORA_TYPE_CHOICE)
+#     obj <- DATASETS_light[[input$TSA_DATASET_CHOICE]][[input$TSA_TISSUE_CHOICE]]
+#     req(obj)
+#     # TO ADD
+#     # scDiffCom::build_interactive_network
+#   })
+# }

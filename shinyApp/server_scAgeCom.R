@@ -16,5 +16,7 @@ server_scAgeCom <- function(
   output$TSA_VOLCANO_PLOT <- plot_TSA_VOLCANO(input)
   output$TSA_ORA_TABLE <- get_TSA_ORA_table(input)
   output$TSA_ORA_PLOT <- plot_TSA_ORA(input)
+  #output$TSA_INTERACTIVE_BIPARTITE_NET <- build_TSA_INTERACTIVE_BIPARTITE_NET(input)
+  #output$TSA_INTERACTIVE_CELLCOMMUNITY_NET <- build_TSA_INTERACTIVE_CELLCOMMUNITY_NET(input)
 }
 

@@ -435,6 +435,7 @@ compute_reduced_ora_go = function(dataset, or_threshold=2, subset='BP', gene_ont
 }
 
 # dt = facs[['Liver']]@ORA$GO
+dt = facs[['Liver']]@ORA
 dt_s = compute_reduced_ora_go(facs[['Liver']], 2, 'BP')
 dt_s
 write.csv(dt_s, file='../../liver_go.csv')
